@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { MySQLRowDataPacket } from "@fastify/mysql"
 import bcrypt from "bcrypt"
-import { User } from "../types/types"
+import { User } from "../types"
 
 
 export async function addUser(req: FastifyRequest, reply: FastifyReply) {
