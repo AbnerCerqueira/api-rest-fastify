@@ -1,6 +1,6 @@
 import { FastifyInstance, RouteOptions } from 'fastify'
 import { addUser, authUser, deleteUser, getUser, updateUser } from '../controllers/index'
-import { verificaJwt } from '../middlewares/auth'
+import { verifyJwt } from '../middlewares/auth'
 
 const cadastro: RouteOptions = {
     method: 'POST',
@@ -17,21 +17,21 @@ const login: RouteOptions = {
 const rotaProtegida: RouteOptions = {
     method: 'GET',
     url: '/api/rota-protegida',
-    onRequest: [verificaJwt],
+    onRequest: [verifyJwt],
     handler: authUser
 }
 
 const atualizar: RouteOptions = {
     method: 'PUT',
     url: '/api/atualizar',
-    onRequest: [verificaJwt],
+    onRequest: [verifyJwt],
     handler: updateUser
 }
 
 const apagar: RouteOptions = {
     method: 'DELETE',
     url: '/api/apagar',
-    onRequest: [verificaJwt],
+    onRequest: [verifyJwt],
     handler: deleteUser
 }
 

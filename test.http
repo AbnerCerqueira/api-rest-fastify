@@ -18,12 +18,12 @@ Content-Type: application/json
 
 ### ACESSAR ROTA PROTEGIDA
 GET http://localhost:8080/api/rota-protegida HTTP/1.1
-Authorization: Bearer "COLOQUE AQUI SEU TOKEN"
+Authorization: Bearer COLOQUE AQUI SEU TOKEN
 
 ### ATUALIZAR USUARIO
 PUT http://localhost:8080/api/atualizar HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer "COLOQUE AQUI SEU TOKEN"
+Authorization: Bearer COLOQUE AQUI SEU TOKEN
 
 {
     "username": "user_novo",
@@ -32,4 +32,4 @@ Authorization: Bearer "COLOQUE AQUI SEU TOKEN"
 
 ### APAGAR USUÁRIO
 DELETE http://localhost:8080/api/apagar HTTP/1.1
-Authorization: Bearer "COLOQUE AQUI SEU TOKEN"
+Authorization: Bearer COLOQUE AQUI SOU TOKEN
