@@ -26,8 +26,7 @@ Content-Type: application/json
 Authorization: Bearer COLOQUE AQUI SEU TOKEN
 
 {
-    "username": "user_novo",
-    "password": "asdf"
+    "username": "123"
 }
 
 ### APAGAR USUÁRIO
