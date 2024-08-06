@@ -1,15 +1,9 @@
-create database fastify;
+CREATE DATABASE fastify;
 
-use fastify;
+USE fastify;
 
-create table user(
-    id int auto_increment primary key,
-    username varchar(100) unique,
-    password varchar(100)
+CREATE TABLE user(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE,
+    password VARCHAR(100)
 );
-
-select * from user;
-
-truncate table user;
-
-drop table user;

@@ -2,41 +2,42 @@ import { FastifyReply, FastifyRequest } from "fastify"
 import { MySQLRowDataPacket } from "@fastify/mysql"
 import bcrypt from "bcrypt"
 import { User } from "../types"
+import { mysqlCreateUser, mysqlDeleteUser, mysqlGetUser, mysqlUpdateUser } from "../database/dao"
 
 
 export async function addUser(req: FastifyRequest, reply: FastifyReply) {
-    const con = req.server.mysql
-    const sql = 'INSERT INTO user SET ?'
-    const { username, password } = req.body as User
-    const hashedPassword = await bcrypt.hash(password, 10)
-
     try {
-        await con.query(sql, { username: username, password: hashedPassword })
+        const con = req.server.mysql
+        await mysqlCreateUser(con, req.body as User)
         return reply.status(201).send({ message: "Usuário criado" })
     } catch (err: any) {
-        return err.code === "ER_DUP_ENTRY" ? reply.status(409).send({ message: "Usuário ja existe" }) : err
+        return err.code === "ER_DUP_ENTRY" ? reply.status(409).send({ message: "Usuário ja existe" }) : reply.send(err)
     }
 }
 
 export async function getUser(req: FastifyRequest, reply: FastifyReply) {
-    const con = req.server.mysql
-    const sql = 'SELECT id, username, password FROM user WHERE username = ?'
-
+    
     const { username, password } = req.body as User
-    const [rows] = await con.query<MySQLRowDataPacket[]>(sql, username)
-
-    if (!rows.length) {
-        return reply.status(403).send({ message: "Usuário não encontrado" })
+    let result: MySQLRowDataPacket[] = []
+    
+    try {
+        const con = req.server.mysql
+        result = await mysqlGetUser(con, username)
+    } catch (err: any) {
+        return reply.send(err)
     }
 
-    const isMatch = await bcrypt.compare(password, rows[0].password)
+    if (!result.length) {
+        return reply.status(400).send({ message: "Usuário não encontrado" })
+    }
+
+    const isMatch = await bcrypt.compare(password, result[0].password)
     if (!isMatch) {
         return reply.status(403).send({ message: "Senha inválida" })
     }
 
     const token = req.server.jwt.sign({
-        id: rows[0].id,
-        username: rows[0].username,
+        ...result[0]
     }, {
         expiresIn: '1h'
     })
@@ -45,13 +46,11 @@ export async function getUser(req: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function authUser(req: FastifyRequest, reply: FastifyReply) {
-    return reply.status(200).send({ message: "Autenticado com sucesso", user: req.user })
+    const { id, username } = req.user as User
+    return reply.status(200).send({ message: "Autenticado com sucesso", user: { id, username } })
 }
 
 export async function updateUser(req: FastifyRequest, reply: FastifyReply) {
-    const con = req.server.mysql
-    const sql = 'UPDATE user SET ? WHERE id = ?'
-
     const submission = req.body as User
 
     for (const [key, value] of Object.entries(submission)) {
@@ -65,28 +64,27 @@ export async function updateUser(req: FastifyRequest, reply: FastifyReply) {
     }
 
     if (Object.keys(submission).length === 0) {
-        return reply.status(204)
+        return reply.status(204).send()
     }
 
     try {
+        const con = req.server.mysql
         const { id } = req.user as User
-        const [rows]: any = await con.query<MySQLRowDataPacket[]>(sql, [submission, id])
-        return rows.affectedRows > 0 ? reply.status(200).send({ message: "Usuário atualizado com sucesso" }) : reply.status(400).send({ message: "Não foi possivel atualizar" })
+        const result = await mysqlUpdateUser(con, submission, id)
+        return result.affectedRows > 0 ? reply.status(200).send({ message: "Usuário atualizado com sucesso" }) : reply.status(400).send({ message: "Não foi possivel atualizar" })
     } catch (err: any) {
-        return err
+        return reply.send(err)
     }
 }
 
 export async function deleteUser(req: FastifyRequest, reply: FastifyReply) {
-    const con = req.server.mysql
-    const sql = 'DELETE FROM user WHERE id = ?'
-
     try {
         // OBS: podemos pegar o id pelo parametro da rota, custom header na requisição ou pelo token do usuário autenticado
         const { id } = req.user as User
-        await con.query(sql, id)
-        return reply.status(200).send({ message: "Usuário apagado com sucesso" })
+        const con = req.server.mysql
+        const result = await mysqlDeleteUser(con, id)
+        return result.affectedRows > 0 ? reply.status(200).send({ message: "Usuário apagado com sucesso" }) : reply.status(204).send()
     } catch (err: any) {
-        return err
+        return reply.send(err)
     }
 }

@@ -1,8 +1,8 @@
 import fastify from "fastify"
-import mysqlPlugin from './plugins/mysql'
 import jwtPlugin from './plugins/jwt'
-import swaggerPlugin from './plugins/swagger'
+import mysqlPlugin from './plugins/mysql'
 import routes from "./routes"
+import swaggerPlugin from './plugins/swagger'
 
 const server = fastify({ logger: true })
 
@@ -12,10 +12,9 @@ server.register(swaggerPlugin)
 server.register(routes)
 
 async function start() {
-    const PORT = 8080
     try {
-        await server.listen({ port: PORT })
-        console.log(`Iniciando servidor na porta ${PORT}`)
+        await server.listen({ port: 8000 })
+        console.log(`Iniciando servidor na porta ${8000}`)
     } catch (err) {
         server.log.error(err)
     }
